@@ -8,6 +8,7 @@ bin
 .settings
 target
 logs/latest.log
+**/logs/*
 commandapi-plugin/dependency-reduced-pom.xml
 commandapi-shade/dependency-reduced-pom.xml
 .vscode
