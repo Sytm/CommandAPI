@@ -1,4 +1,11 @@
 package dev.jorel.commandapi.test;
+import static dev.jorel.commandapi.test.Assertions.assertInvalidSyntax;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,21 +17,16 @@ import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.advancement.Advancement;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.WorldMock;
 import be.seeseemelk.mockbukkit.entity.PlayerMock;
-import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.AdvancementArgument;
 import dev.jorel.commandapi.arguments.AdventureChatComponentArgument;
 import dev.jorel.commandapi.arguments.BooleanArgument;
@@ -40,7 +42,6 @@ import dev.jorel.commandapi.arguments.LocationType;
 import dev.jorel.commandapi.arguments.PlayerArgument;
 import dev.jorel.commandapi.arguments.PotionEffectArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
-import dev.jorel.commandapi.test.Main;
 import dev.jorel.commandapi.wrappers.Location2D;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -52,7 +53,7 @@ import net.md_5.bungee.chat.ComponentSerializer;
  */
 public class ArgumentTests {
 	
-	private CustomServerMock server;
+	private CommandAPIServerMock server;
 	private Main plugin;
 
 	private String getDispatcherString() {
@@ -63,13 +64,9 @@ public class ArgumentTests {
 		}
 	}
 
-	public void assertInvalidSyntax(CommandSender sender, String command) {
-		assertThrows(CommandSyntaxException.class, () -> assertTrue(server.dispatchThrowableCommand(sender,command)));
-	}
-
 	@BeforeEach
 	public void setUp() {
-		server = MockBukkit.mock(new CustomServerMock());
+		server = MockBukkit.mock(new CommandAPIServerMock());
 		plugin = MockBukkit.load(Main.class);
 	}
 
@@ -84,7 +81,7 @@ public class ArgumentTests {
 
 	@Test
 	public void executionTest() {
-		new CommandAPICommand("test")
+		new CommandAPITestCommand("test")
 			.executesPlayer((player, args) -> {
 				player.sendMessage("success");
 			})
@@ -98,7 +95,7 @@ public class ArgumentTests {
 
 	@Test
 	public void executionTestWithStringArgument() {
-		new CommandAPICommand("test")
+		new CommandAPITestCommand("test")
 			.withArguments(new StringArgument("value"))
 			.executesPlayer((player, args) -> {
 				String value = (String) args[0];
@@ -145,13 +142,13 @@ public class ArgumentTests {
 		assertEquals("success Hello_world", player.nextMessage());
 
 		// Negative tests from the documentation
-		assertInvalidSyntax(player, "test hello@email.com");
-		assertInvalidSyntax(player, "test yesn't");
+		assertInvalidSyntax(server, player, "test hello@email.com");
+		assertInvalidSyntax(server, player, "test yesn't");
 	}
 
 	@Test
 	public void executionTestWithBooleanArgument() {
-		new CommandAPICommand("test")
+		new CommandAPITestCommand("test")
 			.withArguments(new BooleanArgument("value"))
 			.executesPlayer((player, args) -> {
 				boolean value = (boolean) args[0];
@@ -164,12 +161,12 @@ public class ArgumentTests {
 		server.dispatchCommand(player, "test false");
 		assertEquals("success true", player.nextMessage());
 		assertEquals("success false", player.nextMessage());
-		assertInvalidSyntax(player, "test aaaaa");
+		assertInvalidSyntax(server, player, "test aaaaa");
 	}
 	
 	@Test
 	public void executionTestWithAdvancementArgument() {
-		new CommandAPICommand("adv")
+		new CommandAPITestCommand("adv")
 			.withArguments(new AdvancementArgument("value"))
 			.executesPlayer((player, args) -> {
 				Advancement advancement = (Advancement) args[0];
@@ -190,7 +187,7 @@ public class ArgumentTests {
 	
 	@Test
 	public void executionTestWithLocationArgument() {
-		new CommandAPICommand("loc3")
+		new CommandAPITestCommand("loc3")
 			.withArguments(new LocationArgument("value", LocationType.PRECISE_POSITION))
 			.executesPlayer((player, args) -> {
 				Location value = (Location) args[0];
@@ -198,7 +195,7 @@ public class ArgumentTests {
 			})
 			.register();
 		
-		new CommandAPICommand("loc3b")
+		new CommandAPITestCommand("loc3b")
 			.withArguments(new LocationArgument("value", LocationType.BLOCK_POSITION))
 			.executesPlayer((player, args) -> {
 				Location value = (Location) args[0];
@@ -206,7 +203,7 @@ public class ArgumentTests {
 			})
 			.register();
 		
-		new CommandAPICommand("loc2")
+		new CommandAPITestCommand("loc2")
 			.withArguments(new Location2DArgument("value", LocationType.PRECISE_POSITION))
 			.executesPlayer((player, args) -> {
 				Location2D value = (Location2D) args[0];
@@ -214,7 +211,7 @@ public class ArgumentTests {
 			})
 			.register();
 		
-		new CommandAPICommand("loc2b")
+		new CommandAPITestCommand("loc2b")
 			.withArguments(new Location2DArgument("value", LocationType.BLOCK_POSITION))
 			.executesPlayer((player, args) -> {
 				Location2D value = (Location2D) args[0];
@@ -246,7 +243,7 @@ public class ArgumentTests {
 	
 	@Test
 	public void executionTestWithEntitySelectorArgument() {
-		new CommandAPICommand("test")
+		new CommandAPITestCommand("test")
 			.withArguments(new EntitySelectorArgument<Player>("value", EntitySelector.ONE_PLAYER))
 			.executesPlayer((player, args) -> {
 				Player value = (Player) args[0];
@@ -254,7 +251,7 @@ public class ArgumentTests {
 			})
 			.register();
 
-		new CommandAPICommand("testall")
+		new CommandAPITestCommand("testall")
 			.withArguments(new EntitySelectorArgument<Collection<Player>>("value", EntitySelector.MANY_PLAYERS))
 			.executesPlayer((player, args) -> {
 				@SuppressWarnings("unchecked")
@@ -279,7 +276,7 @@ public class ArgumentTests {
 	
 	@RepeatedTest(10)
 	public void executionTestWithGreedyStringArgument() {
-		new CommandAPICommand("test")
+		new CommandAPITestCommand("test")
 			.withArguments(new GreedyStringArgument("value"))
 			.executesPlayer((player, args) -> {
 				String value = (String) args[0];
@@ -300,9 +297,9 @@ public class ArgumentTests {
 	
 	@Test
 	public void executionTestWithPotionEffectArgument() {
-		Mut<PotionEffectType> type = Mut.of();
+		ArgumentInspector<PotionEffectType> type = ArgumentInspector.of();
 
-		new CommandAPICommand("test")
+		new CommandAPITestCommand("test")
 			.withArguments(new PotionEffectArgument("potion"))
 			.executesPlayer((player, args) -> {
 				type.set((PotionEffectType) args[0]);
@@ -322,13 +319,13 @@ public class ArgumentTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void executionTestWithListArgument() {
-		Mut<List<String>> type = Mut.of();
+		ArgumentInspector<List<String>> type = ArgumentInspector.of();
 
 		PlayerMock sender = server.addPlayer("APlayer");
 		
 		// Typical usage of a list argument
 
-		new CommandAPICommand("list")
+		new CommandAPITestCommand("list")
 			.withArguments(new ListArgumentBuilder<>("values", ", ")
 				.withList(() -> List.of("cat", "wolf", "axolotl"))
 				.withStringMapper()
@@ -339,14 +336,14 @@ public class ArgumentTests {
 			.register();
 
 		server.dispatchCommand(sender, "list cat, wolf, axolotl"); // normal list
-		assertInvalidSyntax(sender, "list cat, wolf, axolotl, wolf"); // don't allow duplicates
-		assertInvalidSyntax(sender, "list axolotl, wolf, chicken, cat"); // don't allow unknown items
+		assertInvalidSyntax(server, sender, "list cat, wolf, axolotl, wolf"); // don't allow duplicates
+		assertInvalidSyntax(server, sender, "list axolotl, wolf, chicken, cat"); // don't allow unknown items
 
 		assertEquals(List.of("cat", "wolf", "axolotl"), type.get());
 		
 		// List argument, with duplicates
 
-		new CommandAPICommand("listdup")
+		new CommandAPITestCommand("listdup")
 			.withArguments(new ListArgumentBuilder<>("values", ", ")
 				.allowDuplicates(true)
 				.withList(() -> List.of("cat", "wolf", "axolotl"))
@@ -358,13 +355,13 @@ public class ArgumentTests {
 			.register();
 
 		server.dispatchCommand(sender, "listdup cat, wolf, axolotl, cat, wolf"); // allow duplicates
-		assertInvalidSyntax(sender, "listdup cat, wolf, axolotl, chicken, cat"); // don't allow unknown items
+		assertInvalidSyntax(server, sender, "listdup cat, wolf, axolotl, chicken, cat"); // don't allow unknown items
 
 		assertEquals(List.of("cat", "wolf", "axolotl", "cat", "wolf"), type.get());
 
 		// List argument, with a constant list (not using a supplier)
 		
-		new CommandAPICommand("listconst")
+		new CommandAPITestCommand("listconst")
 			.withArguments(new ListArgumentBuilder<>("values", ", ")
 				.withList(List.of("cat", "wolf", "axolotl"))
 				.withStringMapper()
@@ -375,14 +372,14 @@ public class ArgumentTests {
 			.register();
 
 		server.dispatchCommand(sender, "listconst cat, wolf, axolotl"); // normal list
-		assertInvalidSyntax(sender, "listconst cat, wolf, axolotl, wolf"); // don't allow duplicates
-		assertInvalidSyntax(sender, "listconst axolotl, wolf, chicken, cat"); // don't allow unknown items
+		assertInvalidSyntax(server, sender, "listconst cat, wolf, axolotl, wolf"); // don't allow duplicates
+		assertInvalidSyntax(server, sender, "listconst axolotl, wolf, chicken, cat"); // don't allow unknown items
 
 		assertEquals(List.of("cat", "wolf", "axolotl"), type.get());
 		
 		// List argument using a function
 		
-		new CommandAPICommand("listfunc")
+		new CommandAPITestCommand("listfunc")
 			.withArguments(new ListArgumentBuilder<>("values", ", ")
 				.withList(player -> List.of("cat", "wolf", "axolotl", player.getName()))
 				.withStringMapper()
@@ -393,8 +390,8 @@ public class ArgumentTests {
 			.register();
 
 		server.dispatchCommand(sender, "listfunc cat, wolf, axolotl"); // normal list
-		assertInvalidSyntax(sender, "listfunc cat, wolf, axolotl, wolf"); // don't allow duplicates
-		assertInvalidSyntax(sender, "listfunc axolotl, wolf, chicken, cat"); // don't allow unknown items
+		assertInvalidSyntax(server, sender, "listfunc cat, wolf, axolotl, wolf"); // don't allow duplicates
+		assertInvalidSyntax(server, sender, "listfunc axolotl, wolf, chicken, cat"); // don't allow unknown items
 		server.dispatchCommand(sender, "listfunc axolotl, wolf, " + sender.getName()); // sender name
 
 		assertEquals(List.of("cat", "wolf", "axolotl"), type.get());
@@ -404,13 +401,13 @@ public class ArgumentTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void executionTestWithListTextArgument() {
-		Mut<List<String>> type = Mut.of();
+		ArgumentInspector<List<String>> type = ArgumentInspector.of();
 
 		PlayerMock sender = server.addPlayer("APlayer");
 		
 		// Typical usage of a list argument
 
-		new CommandAPICommand("list")
+		new CommandAPITestCommand("list")
 			.withArguments(new ListArgumentBuilder<>("values", ", ")
 				.withList(() -> List.of("cat", "wolf", "axolotl"))
 				.withStringMapper()
@@ -421,14 +418,14 @@ public class ArgumentTests {
 			.register();
 
 		server.dispatchCommand(sender, "list \"cat, wolf, axolotl\""); // normal list
-		assertInvalidSyntax(sender, "list \"cat, wolf, axolotl, wolf\""); // don't allow duplicates
-		assertInvalidSyntax(sender, "list \"axolotl, wolf, chicken, cat\""); // don't allow unknown items
+		assertInvalidSyntax(server, sender, "list \"cat, wolf, axolotl, wolf\""); // don't allow duplicates
+		assertInvalidSyntax(server, sender, "list \"axolotl, wolf, chicken, cat\""); // don't allow unknown items
 
 		assertEquals(List.of("cat", "wolf", "axolotl"), type.get());
 		
 		// List argument, with duplicates
 
-		new CommandAPICommand("listdup")
+		new CommandAPITestCommand("listdup")
 			.withArguments(new ListArgumentBuilder<>("values", ", ")
 				.allowDuplicates(true)
 				.withList(() -> List.of("cat", "wolf", "axolotl"))
@@ -440,13 +437,13 @@ public class ArgumentTests {
 			.register();
 
 		server.dispatchCommand(sender, "listdup \"cat, wolf, axolotl, cat, wolf\""); // allow duplicates
-		assertInvalidSyntax(sender, "listdup \"cat, wolf, axolotl, chicken, cat\""); // don't allow unknown items
+		assertInvalidSyntax(server, sender, "listdup \"cat, wolf, axolotl, chicken, cat\""); // don't allow unknown items
 
 		assertEquals(List.of("cat", "wolf", "axolotl", "cat", "wolf"), type.get());
 
 		// List argument, with a constant list (not using a supplier)
 		
-		new CommandAPICommand("listconst")
+		new CommandAPITestCommand("listconst")
 			.withArguments(new ListArgumentBuilder<>("values", ", ")
 				.withList(List.of("cat", "wolf", "axolotl"))
 				.withStringMapper()
@@ -457,14 +454,14 @@ public class ArgumentTests {
 			.register();
 
 		server.dispatchCommand(sender, "listconst \"cat, wolf, axolotl\""); // normal list
-		assertInvalidSyntax(sender, "listconst \"cat, wolf, axolotl, wolf\""); // don't allow duplicates
-		assertInvalidSyntax(sender, "listconst \"axolotl, wolf, chicken, cat\""); // don't allow unknown items
+		assertInvalidSyntax(server, sender, "listconst \"cat, wolf, axolotl, wolf\""); // don't allow duplicates
+		assertInvalidSyntax(server, sender, "listconst \"axolotl, wolf, chicken, cat\""); // don't allow unknown items
 
 		assertEquals(List.of("cat", "wolf", "axolotl"), type.get());
 		
 		// List argument using a function
 		
-		new CommandAPICommand("listfunc")
+		new CommandAPITestCommand("listfunc")
 			.withArguments(new ListArgumentBuilder<>("values", ", ")
 				.withList(player -> List.of("cat", "wolf", "axolotl", player.getName()))
 				.withStringMapper()
@@ -475,8 +472,8 @@ public class ArgumentTests {
 			.register();
 
 		server.dispatchCommand(sender, "listfunc \"cat, wolf, axolotl\""); // normal list
-		assertInvalidSyntax(sender, "listfunc \"cat, wolf, axolotl, wolf\""); // don't allow duplicates
-		assertInvalidSyntax(sender, "listfunc \"axolotl, wolf, chicken, cat\""); // don't allow unknown items
+		assertInvalidSyntax(server, sender, "listfunc \"cat, wolf, axolotl, wolf\""); // don't allow duplicates
+		assertInvalidSyntax(server, sender, "listfunc \"axolotl, wolf, chicken, cat\""); // don't allow unknown items
 		server.dispatchCommand(sender, "listfunc \"axolotl, wolf, " + sender.getName() + "\""); // sender name
 
 		assertEquals(List.of("cat", "wolf", "axolotl"), type.get());
@@ -484,7 +481,7 @@ public class ArgumentTests {
 		
 		// List argument followed by another list argument
 		
-		new CommandAPICommand("list2")
+		new CommandAPITestCommand("list2")
 			.withArguments(new ListArgumentBuilder<>("values", ", ")
 				.withList(player -> List.of("cat", "wolf", "axolotl"))
 				.withStringMapper()
@@ -507,9 +504,9 @@ public class ArgumentTests {
 
 	@Test
 	public void executionTestWithPlayerArgument() {
-		Mut<Player> type = Mut.of();
+		ArgumentInspector<Player> type = ArgumentInspector.of();
 
-		new CommandAPICommand("test")
+		new CommandAPITestCommand("test")
 			.withArguments(new PlayerArgument("target"))
 			.executesPlayer((player, args) -> {
 				type.set((Player) args[0]);
@@ -518,24 +515,24 @@ public class ArgumentTests {
 
 		PlayerMock player = server.addPlayer("APlayer");
 		server.dispatchCommand(player, "test APlayer");
-		assertInvalidSyntax(player, "test BPlayer");
+		assertInvalidSyntax(server, player, "test BPlayer");
 		assertEquals(player, type.get());
 		assertEquals(null, type.get());
 	}
 	
 	@Test
 	public void executionTestWithChatComponentArgument() {
-		Mut<BaseComponent[]> spigot = Mut.of();
-		Mut<Component> adventure = Mut.of();
+		ArgumentInspector<BaseComponent[]> spigot = ArgumentInspector.of();
+		ArgumentInspector<Component> adventure = ArgumentInspector.of();
 
-		new CommandAPICommand("spigot")
+		new CommandAPITestCommand("spigot")
 			.withArguments(new ChatComponentArgument("text"))
 			.executesPlayer((player, args) -> {
 				spigot.set((BaseComponent[]) args[0]);
 			})
 			.register();
 		
-		new CommandAPICommand("adventure")
+		new CommandAPITestCommand("adventure")
 			.withArguments(new AdventureChatComponentArgument("text"))
 			.executesPlayer((player, args) -> {
 				adventure.set((Component) args[0]);
@@ -574,20 +571,18 @@ public class ArgumentTests {
 	
 	@Test // Pre-#321 
 	public void executionTwoCommandsSameArgumentDifferentName() {
-		Mut<String> str1 = Mut.of();
-		Mut<String> str2 = Mut.of();
+		ArgumentInspector<String> str1 = ArgumentInspector.of();
+		ArgumentInspector<String> str2 = ArgumentInspector.of();
 
-		new CommandAPICommand("test")
+		new CommandAPITestCommand("test", str1)
 			.withArguments(new StringArgument("str_1"))
 			.executesPlayer((player, args) -> {
-				str1.set((String) args[0]);
 			})
 			.register();
 		
-		new CommandAPICommand("test")
+		new CommandAPITestCommand("test", str2)
 			.withArguments(new StringArgument("str_2"))
 			.executesPlayer((player, args) -> {
-				str2.set((String) args[0]);
 			})
 			.register();
 
@@ -600,20 +595,18 @@ public class ArgumentTests {
 	
 	@Test // Pre-#321
 	public void executionTwoCommandsSameArgumentDifferentNameDifferentImplementation() {
-		Mut<Integer> int1 = Mut.of();
-		Mut<Integer> int2 = Mut.of();
+		ArgumentInspector<Integer> int1 = ArgumentInspector.of();
+		ArgumentInspector<Integer> int2 = ArgumentInspector.of();
 
-		new CommandAPICommand("test")
+		new CommandAPITestCommand("test", int1)
 			.withArguments(new IntegerArgument("int_1", 1, 10))
 			.executesPlayer((player, args) -> {
-				int1.set((int) args[0]);
 			})
 			.register();
 		
-		new CommandAPICommand("test")
+		new CommandAPITestCommand("test", int2)
 			.withArguments(new IntegerArgument("str_2", 50, 100))
 			.executesPlayer((player, args) -> {
-				int2.set((int) args[0]);
 			})
 			.register();
 
@@ -626,20 +619,18 @@ public class ArgumentTests {
 	
 	@Test // Pre-#321
 	public void executionTwoCommandsSameArgumentDifferentNameDifferentImplementation2() {
-		Mut<Integer> int1 = Mut.of();
-		Mut<Integer> int2 = Mut.of();
+		ArgumentInspector<Integer> int1 = ArgumentInspector.of();
+		ArgumentInspector<Integer> int2 = ArgumentInspector.of();
 
-		new CommandAPICommand("test")
+		new CommandAPITestCommand("test", int1)
 			.withArguments(new IntegerArgument("int_1", 1, 100))
 			.executesPlayer((player, args) -> {
-				int1.set((int) args[0]);
 			})
 			.register();
 		
-		new CommandAPICommand("test")
+		new CommandAPITestCommand("test", int2)
 			.withArguments(new IntegerArgument("str_2", 50, 100))
 			.executesPlayer((player, args) -> {
-				int2.set((int) args[0]);
 			})
 			.register();
 

@@ -25,7 +25,7 @@ import dev.jorel.commandapi.test.Main;
 @SuppressWarnings("unused")
 public class CommandTests {
 
-	private CustomServerMock server;
+	private CommandAPIServerMock server;
 	private Main plugin;
 
 	private String getDispatcherString() {
@@ -38,7 +38,7 @@ public class CommandTests {
 
 	@BeforeEach
 	public void setUp() {
-		server = MockBukkit.mock(new CustomServerMock());
+		server = MockBukkit.mock(new CommandAPIServerMock());
 		plugin = MockBukkit.load(Main.class);
 	}
 

@@ -19,12 +19,12 @@ import dev.jorel.commandapi.test.Main;
  */
 public class SuggestionsTests {
 
-	private CustomServerMock server;
+	private CommandAPIServerMock server;
 	private Main plugin;
 
 	@BeforeEach
 	public void setUp() {
-		server = MockBukkit.mock(new CustomServerMock());
+		server = MockBukkit.mock(new CommandAPIServerMock());
 		plugin = MockBukkit.load(Main.class);
 	}
 

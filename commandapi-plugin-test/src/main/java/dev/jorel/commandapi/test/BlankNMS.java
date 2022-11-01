@@ -12,7 +12,6 @@ import org.bukkit.Sound;
 import org.bukkit.World.Environment;
 import org.bukkit.command.Command;
 import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.entity.Player;
 import org.bukkit.help.HelpTopic;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;

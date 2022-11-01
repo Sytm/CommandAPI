@@ -22,12 +22,12 @@ import net.kyori.adventure.text.format.TextDecoration;
  */
 public class ChatPreviewTests {
 	
-	private CustomServerMock server;
+	private CommandAPIServerMock server;
 	private Main plugin;
 
 	@BeforeEach
 	public void setUp() {
-		server = MockBukkit.mock(new CustomServerMock());
+		server = MockBukkit.mock(new CommandAPIServerMock());
 		plugin = MockBukkit.load(Main.class);
 	}
 
