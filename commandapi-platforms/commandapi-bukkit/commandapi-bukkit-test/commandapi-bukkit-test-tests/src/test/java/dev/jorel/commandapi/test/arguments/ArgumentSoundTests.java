@@ -86,7 +86,7 @@ public class ArgumentSoundTests extends TestBase {
 		PlayerMock player = server.addPlayer();
 		
 		for (Sound sound : MockPlatform.getInstance().getSounds()) {
-			server.dispatchCommand(player, "test " + sound.getKey());
+			server.dispatchCommand(player, "test " + MockPlatform.getInstance().getNamespacedSound(sound));
 			assertEquals(sound, results.get());
 		}
 
@@ -142,7 +142,7 @@ public class ArgumentSoundTests extends TestBase {
 		// /test
 		assertEquals(
 			Arrays.stream(MockPlatform.getInstance().getSounds())
-				.map(s -> s.getKey().toString())
+				.map(MockPlatform.getInstance()::getNamespacedSound)
 				.sorted()
 				.toList(), 
 			server.getSuggestions(player, "test "));
@@ -150,7 +150,7 @@ public class ArgumentSoundTests extends TestBase {
 		// /test minecraft:s
 		assertEquals(
 			Arrays.stream(MockPlatform.getInstance().getSounds())
-				.map(s -> s.getKey().toString())
+				.map(MockPlatform.getInstance()::getNamespacedSound)
 				.filter(s -> s.startsWith("minecraft:s"))
 				.sorted()
 				.toList(),

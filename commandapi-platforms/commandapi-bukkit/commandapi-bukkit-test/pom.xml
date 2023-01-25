@@ -39,6 +39,8 @@
         <module>commandapi-bukkit-test-impl-1.18</module>
         <module>commandapi-bukkit-test-impl-1.17</module>
         <module>commandapi-bukkit-test-impl-1.16.5</module>
+        <!-- TODO: More versions here -->
+        <module>commandapi-bukkit-test-impl-1.13</module>
 
 		<!-- Tests -->
 		<module>commandapi-bukkit-test-tests</module>

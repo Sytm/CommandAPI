@@ -2,19 +2,17 @@ package dev.jorel.commandapi.test;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.io.IOException;
 import java.security.CodeSource;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.bukkit.Bukkit;
@@ -25,10 +23,9 @@ import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemFactory;
+import org.bukkit.craftbukkit.v1_13_R1.CraftSound;
+import org.bukkit.craftbukkit.v1_13_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_13_R1.inventory.CraftItemFactory;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -37,42 +34,34 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Team;
 import org.mockito.Mockito;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Streams;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 
-import be.seeseemelk.mockbukkit.ServerMock;
 import be.seeseemelk.mockbukkit.WorldMock;
-import be.seeseemelk.mockbukkit.enchantments.EnchantmentMock;
-import be.seeseemelk.mockbukkit.potion.MockPotionEffectType;
 import dev.jorel.commandapi.CommandAPIBukkit;
 import dev.jorel.commandapi.commandsenders.AbstractCommandSender;
 import dev.jorel.commandapi.commandsenders.BukkitCommandSender;
-import net.minecraft.server.v1_16_R3.Advancement;
-import net.minecraft.server.v1_16_R3.AdvancementDataWorld;
-import net.minecraft.server.v1_16_R3.ArgumentAnchor.Anchor;
-import net.minecraft.server.v1_16_R3.CommandListenerWrapper;
-import net.minecraft.server.v1_16_R3.CraftingManager;
-import net.minecraft.server.v1_16_R3.DispenserRegistry;
-import net.minecraft.server.v1_16_R3.EntityPlayer;
-import net.minecraft.server.v1_16_R3.IRecipe;
-import net.minecraft.server.v1_16_R3.IRegistry;
-import net.minecraft.server.v1_16_R3.LootTableRegistry;
-import net.minecraft.server.v1_16_R3.LootTables;
-import net.minecraft.server.v1_16_R3.MinecraftKey;
-import net.minecraft.server.v1_16_R3.MinecraftServer;
-import net.minecraft.server.v1_16_R3.MobEffectList;
-import net.minecraft.server.v1_16_R3.PlayerList;
-import net.minecraft.server.v1_16_R3.Recipes;
-import net.minecraft.server.v1_16_R3.ResourceKey;
-import net.minecraft.server.v1_16_R3.ScoreboardServer;
-import net.minecraft.server.v1_16_R3.ScoreboardTeam;
-import net.minecraft.server.v1_16_R3.SharedConstants;
-import net.minecraft.server.v1_16_R3.UserCache;
-import net.minecraft.server.v1_16_R3.Vec2F;
-import net.minecraft.server.v1_16_R3.Vec3D;
-import net.minecraft.server.v1_16_R3.WorldServer;
+import net.minecraft.server.v1_13_R1.Advancement;
+import net.minecraft.server.v1_13_R1.AdvancementDataWorld;
+import net.minecraft.server.v1_13_R1.ArgumentAnchor.Anchor;
+import net.minecraft.server.v1_13_R1.CommandListenerWrapper;
+import net.minecraft.server.v1_13_R1.CraftingManager;
+import net.minecraft.server.v1_13_R1.DispenserRegistry;
+import net.minecraft.server.v1_13_R1.EntityPlayer;
+import net.minecraft.server.v1_13_R1.Item;
+import net.minecraft.server.v1_13_R1.LootTableRegistry;
+import net.minecraft.server.v1_13_R1.LootTables;
+import net.minecraft.server.v1_13_R1.MinecraftKey;
+import net.minecraft.server.v1_13_R1.MinecraftServer;
+import net.minecraft.server.v1_13_R1.MobEffectList;
+import net.minecraft.server.v1_13_R1.PlayerList;
+import net.minecraft.server.v1_13_R1.ScoreboardServer;
+import net.minecraft.server.v1_13_R1.ScoreboardTeam;
+import net.minecraft.server.v1_13_R1.SoundEffect;
+import net.minecraft.server.v1_13_R1.UserCache;
+import net.minecraft.server.v1_13_R1.Vec2F;
+import net.minecraft.server.v1_13_R1.Vec3D;
+import net.minecraft.server.v1_13_R1.WorldServer;
 
 public class MockNMS extends Enums {
 
@@ -83,7 +72,7 @@ public class MockNMS extends Enums {
 		}
 	}
 
-	static AdvancementDataWorld advancementDataWorld = new AdvancementDataWorld(null);
+	static AdvancementDataWorld advancementDataWorld = new AdvancementDataWorld();
 	MinecraftServer minecraftServerMock = null;
 	List<EntityPlayer> players = new ArrayList<>();
 	PlayerList playerListMock;
@@ -98,7 +87,7 @@ public class MockNMS extends Enums {
 		BASE_NMS = nms;
 
 		// Initialize WorldVersion (game version)
-		SharedConstants.b();
+//		SharedConstants.b();
 
 		// MockBukkit is very helpful and registers all of the potion
 		// effects and enchantments for us. We need to not do this (because
@@ -108,7 +97,7 @@ public class MockNMS extends Enums {
 
 		// Invoke Minecraft's registry. This also initializes all argument types.
 		// How convenient!
-		DispenserRegistry.init();
+		DispenserRegistry.c();
 
 		// Don't use EnchantmentMock.registerDefaultEnchantments because we want
 		// to specify what enchantments to mock (i.e. only 1.18 ones, and not any
@@ -171,8 +160,6 @@ public class MockNMS extends Enums {
 		registerPotionEffectType(28, "SLOW_FALLING", false, 16773073);
 		registerPotionEffectType(29, "CONDUIT_POWER", false, 1950417);
 		registerPotionEffectType(30, "DOLPHINS_GRACE", false, 8954814);
-		registerPotionEffectType(31, "BAD_OMEN", false, 745784);
-		registerPotionEffectType(32, "HERO_OF_THE_VILLAGE", false, 4521796);
 		PotionEffectType.stopAcceptingRegistrations();
 	}
 
@@ -189,29 +176,30 @@ public class MockNMS extends Enums {
 	private void registerDefaultEnchantments() {
 		for (Enchantment enchantment : getInstance().getEnchantments()) {
 			if (Enchantment.getByKey(enchantment.getKey()) == null) {
-				Enchantment.registerEnchantment(new EnchantmentMock(enchantment.getKey(), enchantment.getKey().getKey()));
+				Enchantment.registerEnchantment(new MockEnchantment(enchantment.getKey(), enchantment.getKey().getKey()));
 			}
 		}
 	}
 	
 	private void registerDefaultRecipes() {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		List<IRecipe<?>> recipes = (List) getRecipes(MinecraftServer.class)
-			.stream()
-			.map(p -> CraftingManager.a(new MinecraftKey(p.first()), p.second()))
-			.toList();
-		
-		// 1.16 and below doesn't have the lovely CraftingManager#replaceRecipes method
-		// that 1.17+ has, so we'll just stub it in here:
-		Map<Recipes<?>, Object2ObjectLinkedOpenHashMap<MinecraftKey, IRecipe<?>>> map = new HashMap<>();
-		for(IRecipe<?> recipe : recipes) {
-			Map<MinecraftKey, IRecipe<?>> innerMap = map.computeIfAbsent(recipe.g(), r -> new Object2ObjectLinkedOpenHashMap<>());
-			
-			final MinecraftKey recipeID = recipe.getKey();
-			innerMap.put(recipeID, recipe);
-		}
-		
-		setField(CraftingManager.class, "recipes", recipeManager, ImmutableMap.copyOf(map));
+		// TODO: Implement
+//		@SuppressWarnings({ "unchecked", "rawtypes" })
+//		List<IRecipe<?>> recipes = (List) getRecipes(MinecraftServer.class)
+//			.stream()
+//			.map(p -> CraftingManager.a(new MinecraftKey(p.first()), p.second()))
+//			.toList();
+//		
+//		// 1.16 and below doesn't have the lovely CraftingManager#replaceRecipes method
+//		// that 1.17+ has, so we'll just stub it in here:
+//		Map<Recipes<?>, Object2ObjectLinkedOpenHashMap<MinecraftKey, IRecipe<?>>> map = new HashMap<>();
+//		for(IRecipe<?> recipe : recipes) {
+//			Map<MinecraftKey, IRecipe<?>> innerMap = map.computeIfAbsent(recipe.g(), r -> new Object2ObjectLinkedOpenHashMap<>());
+//			
+//			final MinecraftKey recipeID = recipe.getKey();
+//			innerMap.put(recipeID, recipe);
+//		}
+//		
+//		setField(CraftingManager.class, "recipes", recipeManager, ImmutableMap.copyOf(map));
 	}
 
 	/**********************
@@ -226,12 +214,13 @@ public class MockNMS extends Enums {
 	
 	@Override
 	public String getNamespacedSound(Sound sound) {
-		return sound.getKey().toString();
+		return CraftSound.getSound(sound);
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public String getNamespacedEntityType(EntityType entity) {
-		return entity.getKey().toString();
+		return "minecraft:" + entity.getName();
 	}
 	
 	/**************************
@@ -243,9 +232,10 @@ public class MockNMS extends Enums {
 		return CraftItemFactory.instance();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> getAllItemNames() {
-		return StreamSupport.stream(IRegistry.ITEM.spliterator(), false)
+		return StreamSupport.stream(Item.REGISTRY.spliterator(), false)
 			.map(Object::toString)
 			.map(s -> "minecraft:" + s)
 			.sorted()
@@ -259,7 +249,9 @@ public class MockNMS extends Enums {
 
 	@Override
 	public SimpleCommandMap getSimpleCommandMap() {
-		return ((ServerMock) Bukkit.getServer()).getCommandMap();
+		// TODO: Don't know how to do this yet
+		// return ((ServerMock) Bukkit.getServer()).getSimpleCommandMap();
+		return new SimpleCommandMap(Bukkit.getServer());
 	}
 
 	@Override
@@ -305,20 +297,20 @@ public class MockNMS extends Enums {
 				});
 			}
 
-			// CommandListenerWrapper#levels
-			Mockito.when(clw.p()).thenAnswer(invocation -> {
-				Set<ResourceKey<net.minecraft.server.v1_16_R3.World>> set = new HashSet<>();
-				// We only need to implement resourceKey.a()
-
-				for (World world : Bukkit.getWorlds()) {
-					@SuppressWarnings("unchecked")
-					ResourceKey<net.minecraft.server.v1_16_R3.World> key = Mockito.mock(ResourceKey.class);
-					Mockito.when(key.a()).thenReturn(new MinecraftKey(world.getName()));
-					set.add(key);
-				}
-
-				return set;
-			});
+			// CommandListenerWrapper#levels <<- This doesn't exist in 1.13
+//			Mockito.when(clw.p()).thenAnswer(invocation -> {
+//				Set<ResourceKey<net.minecraft.server.v1_13_R1.World>> set = new HashSet<>();
+//				// We only need to implement resourceKey.a()
+//
+//				for (World world : Bukkit.getWorlds()) {
+//					@SuppressWarnings("unchecked")
+//					ResourceKey<net.minecraft.server.v1_13_R1.World> key = Mockito.mock(ResourceKey.class);
+//					Mockito.when(key.a()).thenReturn(new MinecraftKey(world.getName()));
+//					set.add(key);
+//				}
+//
+//				return set;
+//			});
 
 			// Rotation argument
 			Mockito.when(clw.i()).thenReturn(new Vec2F(loc.getYaw(), loc.getPitch()));
@@ -329,10 +321,10 @@ public class MockNMS extends Enums {
 			});
 			
 			// SoundArgument
-			Mockito.when(clw.n()).thenAnswer(invocation -> IRegistry.SOUND_EVENT.keySet());
+			Mockito.when(clw.n()).thenAnswer(invocation -> SoundEffect.a.keySet());
 			
 			// RecipeArgument
-			Mockito.when(clw.o()).thenAnswer(invocation -> recipeManager.d());
+			Mockito.when(clw.o()).thenAnswer(invocation -> recipeManager.c());
 		}
 		return clw;
 	}
@@ -352,7 +344,7 @@ public class MockNMS extends Enums {
 	@SuppressWarnings("deprecation")
 	@Override
 	public List<NamespacedKey> getAllRecipes() {
-		return recipeManager.d().map(k -> new NamespacedKey(k.getNamespace(), k.getKey())).toList();
+		return recipeManager.c().stream().map(k -> new NamespacedKey(k.b(), k.getKey())).toList();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -362,28 +354,32 @@ public class MockNMS extends Enums {
 			return (T) minecraftServerMock;
 		}
 		minecraftServerMock = Mockito.mock(MinecraftServer.class);
+		
+		minecraftServerMock.vanillaCommandDispatcher = new net.minecraft.server.v1_13_R1.CommandDispatcher();
 
 		// LootTableArgument
-		Mockito.when(minecraftServerMock.getLootTableRegistry()).thenAnswer(invocation -> {
+		// Casting to LootTableRegistry just to make sure we've got the right method
+		Mockito.when((LootTableRegistry) minecraftServerMock.aP()).thenAnswer(invocation -> {
 			LootTableRegistry lootTables = Mockito.mock(LootTableRegistry.class);
-			Mockito.when(lootTables.getLootTable(any(MinecraftKey.class))).thenAnswer(i -> {
-				if (LootTables.a().contains(i.getArgument(0))) {
-					return net.minecraft.server.v1_16_R3.LootTable.EMPTY;
+			Mockito.when(lootTables.a(any(MinecraftKey.class))).thenAnswer(i -> {
+				if (getFieldAs(LootTables.class, "aT", null, Set.class).contains(i.getArgument(0))) {
+					return net.minecraft.server.v1_13_R1.LootTables.a; // "empty"
 				} else {
 					return null;
 				}
 			});
-			Mockito.when(lootTables.a()).thenAnswer(i -> {
-				return Streams
-					.concat(
-						Arrays.stream(getEntityTypes())
-							.filter(e -> !e.equals(EntityType.UNKNOWN))
-							.filter(e -> e.isAlive())
-							.map(EntityType::getKey)
-							.map(k -> new MinecraftKey("minecraft", "entities/" + k.getKey())),
-						LootTables.a().stream())
-					.collect(Collectors.toSet());
-			});
+			// TODO: This never gets called in 1.13?
+//			Mockito.when(lootTables.a()).thenAnswer(i -> {
+//				return Streams
+//					.concat(
+//						Arrays.stream(getEntityTypes())
+//							.filter(e -> !e.equals(EntityType.UNKNOWN))
+//							.filter(e -> e.isAlive())
+//							.map(EntityType::getKey)
+//							.map(k -> new MinecraftKey("minecraft", "entities/" + k.getKey())),
+//						LootTables.a().stream())
+//					.collect(Collectors.toSet());
+//			});
 			return lootTables;
 		});
 
@@ -404,31 +400,36 @@ public class MockNMS extends Enums {
 		Mockito.when(minecraftServerMock.getScoreboard()).thenReturn(scoreboardServerMock); // MinecraftServer#getScoreboard
 
 		// WorldArgument (Dimension)
-		Mockito.when(minecraftServerMock.getWorldServer(any(ResourceKey.class))).thenAnswer(invocation -> {
-			// Get the ResourceKey<World> and extract the world name from it
-			ResourceKey<net.minecraft.server.v1_16_R3.World> resourceKey = invocation.getArgument(0);
-			String worldName = resourceKey.a().getKey();
-
-			// Get the world via Bukkit (returns a WorldMock) and create a
-			// CraftWorld clone of it for WorldServer.getWorld()
-			World world = Bukkit.getServer().getWorld(worldName);
-			if (world == null) {
-				return null;
-			} else {
-				CraftWorld craftWorldMock = Mockito.mock(CraftWorld.class);
-				Mockito.when(craftWorldMock.getName()).thenReturn(world.getName());
-				Mockito.when(craftWorldMock.getUID()).thenReturn(world.getUID());
-
-				// Create our return WorldServer object
-				WorldServer bukkitWorldServerMock = Mockito.mock(WorldServer.class);
-				Mockito.when(bukkitWorldServerMock.getWorld()).thenReturn(craftWorldMock);
-				return bukkitWorldServerMock;
-			}
-		});
+//		Mockito.when(minecraftServerMock.getWorldServer(any(ResourceKey.class))).thenAnswer(invocation -> {
+//			// Get the ResourceKey<World> and extract the world name from it
+//			ResourceKey<net.minecraft.server.v1_16_R3.World> resourceKey = invocation.getArgument(0);
+//			String worldName = resourceKey.a().getKey();
+//
+//			// Get the world via Bukkit (returns a WorldMock) and create a
+//			// CraftWorld clone of it for WorldServer.getWorld()
+//			World world = Bukkit.getServer().getWorld(worldName);
+//			if (world == null) {
+//				return null;
+//			} else {
+//				CraftWorld craftWorldMock = Mockito.mock(CraftWorld.class);
+//				Mockito.when(craftWorldMock.getName()).thenReturn(world.getName());
+//				Mockito.when(craftWorldMock.getUID()).thenReturn(world.getUID());
+//
+//				// Create our return WorldServer object
+//				WorldServer bukkitWorldServerMock = Mockito.mock(WorldServer.class);
+//				Mockito.when(bukkitWorldServerMock.getWorld()).thenReturn(craftWorldMock);
+//				return bukkitWorldServerMock;
+//			}
+//		});
 
 		// Player lists
-		Mockito.when(minecraftServerMock.getPlayerList()).thenAnswer(i -> playerListMock);
-		Mockito.when(minecraftServerMock.getPlayerList().getPlayers()).thenAnswer(i -> players);
+		Mockito.when(minecraftServerMock.getPlayerList()).thenAnswer(i -> {
+			if(playerListMock == null) {
+				playerListMock = Mockito.mock(PlayerList.class);
+			}
+			return playerListMock;
+		});
+		Mockito.when(minecraftServerMock.getPlayerList().v()).thenAnswer(i -> players); // getPlayers
 
 		// PlayerArgument
 		UserCache userCacheMock = Mockito.mock(UserCache.class);
@@ -451,7 +452,7 @@ public class MockNMS extends Enums {
 
 	@Override
 	public org.bukkit.advancement.Advancement addAdvancement(NamespacedKey key) {
-		advancementDataWorld.REGISTRY.advancements.put(new MinecraftKey(key.toString()),
+		AdvancementDataWorld.REGISTRY.advancements.put(new MinecraftKey(key.toString()),
 			new Advancement(new MinecraftKey(key.toString()), null, null, null, new HashMap<>(), null));
 
 		return new org.bukkit.advancement.Advancement() {

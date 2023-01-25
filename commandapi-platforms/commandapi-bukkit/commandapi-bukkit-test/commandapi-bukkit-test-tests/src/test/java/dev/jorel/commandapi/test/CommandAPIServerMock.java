@@ -1,6 +1,5 @@
 package dev.jorel.commandapi.test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
@@ -9,16 +8,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.bukkit.World;
 import org.bukkit.advancement.Advancement;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemFactory;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
@@ -37,16 +31,16 @@ public class CommandAPIServerMock extends ServerMock {
 	public boolean dispatchThrowableCommand(CommandSender sender, String commandLine) throws CommandSyntaxException {
 		String[] commands = commandLine.split(" ");
 		String commandLabel = commands[0];
-		Command command = getCommandMap().getCommand(commandLabel);
-
-		if (command != null) {
-			return super.dispatchCommand(sender, commandLine);
-		} else {
+//		Command command = getCommandMap().getCommand(commandLabel);
+//
+//		if (command != null) {
+//			return super.dispatchCommand(sender, commandLine);
+//		} else {
 			@SuppressWarnings("rawtypes")
 			CommandDispatcher dispatcher = Brigadier.getCommandDispatcher();
 			Object css = Brigadier.getBrigadierSourceFromCommandSender(sender);
 			return dispatcher.execute(commandLine, css) != 0;
-		}
+//		}
 	}
 
 	@Override
@@ -86,9 +80,9 @@ public class CommandAPIServerMock extends ServerMock {
 	}
 
 //	@Override
-	public <T extends Keyed> @Nullable Registry<T> getRegistry(@NotNull Class<T> tClass) {
-		return null;
-	}
+//	public <T extends Keyed> @Nullable Registry<T> getRegistry(@NotNull Class<T> tClass) {
+//		return null;
+//	}
 	
 	static class CustomWorldMock extends WorldMock {
 		

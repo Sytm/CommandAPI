@@ -20,6 +20,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
@@ -194,6 +195,26 @@ public class MockNMS extends Enums {
 		recipeManager.replaceRecipes(recipes);
 	}
 
+	/**********************
+	 * Namespaced lookups *
+	 **********************/
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public String getNamespacedPotionEffectType(PotionEffectType potionEffectType) {
+		return MobEffect.byId(potionEffectType.getId()).getDescriptionId().replace("effect.minecraft.", "minecraft:");
+	}
+	
+	@Override
+	public String getNamespacedSound(Sound sound) {
+		return sound.getKey().toString();
+	}
+	
+	@Override
+	public String getNamespacedEntityType(EntityType entity) {
+		return entity.getKey().toString();
+	}
+
 	/**************************
 	 * MockPlatform overrides *
 	 **************************/
@@ -307,12 +328,6 @@ public class MockNMS extends Enums {
 	@Override
 	public World getWorldForCSS(CommandSourceStack clw) {
 		return new WorldMock();
-	}
-
-	@SuppressWarnings("deprecation")
-	@Override
-	public String getBukkitPotionEffectTypeName(PotionEffectType potionEffectType) {
-		return MobEffect.byId(potionEffectType.getId()).getDescriptionId().replace("effect.minecraft.", "minecraft:");
 	}
 
 	@Override

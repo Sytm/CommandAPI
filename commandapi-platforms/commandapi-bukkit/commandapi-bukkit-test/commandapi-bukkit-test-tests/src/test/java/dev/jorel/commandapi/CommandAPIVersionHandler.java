@@ -1,5 +1,6 @@
 package dev.jorel.commandapi;
 
+import dev.jorel.commandapi.nms.NMS_1_13;
 import dev.jorel.commandapi.nms.NMS_1_16_R3;
 import dev.jorel.commandapi.nms.NMS_1_17;
 import dev.jorel.commandapi.nms.NMS_1_18_R1;
@@ -19,6 +20,7 @@ public interface CommandAPIVersionHandler {
 			case "Minecraft_1_18" -> new NMS_1_18_R1();
 			case "Minecraft_1_17" -> new NMS_1_17();
 			case "Minecraft_1_16_5" -> new NMS_1_16_R3();
+			case "Minecraft_1_13" -> new NMS_1_13();
 			default -> throw new IllegalArgumentException("Unexpected value: " + System.getProperty("profileId"));
 		});
 	}
@@ -29,6 +31,7 @@ public interface CommandAPIVersionHandler {
 			case "Minecraft_1_18" -> MCVersion.V1_18;
 			case "Minecraft_1_17" -> MCVersion.V1_17;
 			case "Minecraft_1_16_5" -> MCVersion.V1_16_5;
+			case "Minecraft_1_13" -> MCVersion.V1_13;
 			default -> throw new IllegalArgumentException("Unexpected value: " + System.getProperty("profileId"));
 		};
 	}

@@ -22,6 +22,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
@@ -202,6 +203,25 @@ public class MockNMS extends Enums {
 		recipeManager.replaceRecipes(recipes);
 	}
 
+	/**********************
+	 * Namespaced lookups *
+	 **********************/
+
+	@Override
+	public String getNamespacedPotionEffectType(PotionEffectType potionEffectType) {
+		return potionEffectType.getKey().asString();
+	}
+	
+	@Override
+	public String getNamespacedSound(Sound sound) {
+		return sound.getKey().asString();
+	}
+	
+	@Override
+	public String getNamespacedEntityType(EntityType entity) {
+		return entity.getKey().asString();
+	}
+
 	/**************************
 	 * MockPlatform overrides *
 	 **************************/
@@ -315,11 +335,6 @@ public class MockNMS extends Enums {
 	@Override
 	public World getWorldForCSS(CommandSourceStack clw) {
 		return new WorldMock();
-	}
-
-	@Override
-	public String getBukkitPotionEffectTypeName(PotionEffectType potionEffectType) {
-		return potionEffectType.getKey().asString();
 	}
 	
 	@Override

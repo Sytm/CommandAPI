@@ -81,7 +81,7 @@ public class ArgumentPotionTests extends TestBase {
 		PlayerMock player = server.addPlayer();
 
 		for (PotionEffectType potionEffect : MockPlatform.getInstance().getPotionEffects()) {
-			server.dispatchCommand(player, "test " + MockPlatform.getInstance().getBukkitPotionEffectTypeName(potionEffect));
+			server.dispatchCommand(player, "test " + MockPlatform.getInstance().getNamespacedPotionEffectType(potionEffect));
 			assertEquals(potionEffect, results.get());
 		}
 
@@ -105,7 +105,7 @@ public class ArgumentPotionTests extends TestBase {
 		// /test minecraft:
 		assertEquals(
 			Arrays.stream(MockPlatform.getInstance().getPotionEffects())
-				.map(MockPlatform.getInstance()::getBukkitPotionEffectTypeName)
+				.map(MockPlatform.getInstance()::getNamespacedPotionEffectType)
 				.sorted()
 				.toList(),
 			server.getSuggestions(player, "test minecraft:")
@@ -114,7 +114,7 @@ public class ArgumentPotionTests extends TestBase {
 		// /test minecraft:s
 		assertEquals(
 			Arrays.stream(MockPlatform.getInstance().getPotionEffects())
-				.map(MockPlatform.getInstance()::getBukkitPotionEffectTypeName)
+				.map(MockPlatform.getInstance()::getNamespacedPotionEffectType)
 				.filter(s -> s.startsWith("minecraft:s"))
 				.sorted()
 				.toList(),
@@ -123,7 +123,7 @@ public class ArgumentPotionTests extends TestBase {
 		// /test s
 		assertEquals(
 			Arrays.stream(MockPlatform.getInstance().getPotionEffects())
-				.map(MockPlatform.getInstance()::getBukkitPotionEffectTypeName)
+				.map(MockPlatform.getInstance()::getNamespacedPotionEffectType)
 				.filter(s -> s.startsWith("minecraft:s"))
 				.sorted()
 				.toList(),

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -27,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
+import be.seeseemelk.mockbukkit.ServerMock;
 import dev.jorel.commandapi.CommandAPIVersionHandler;
 import dev.jorel.commandapi.MCVersion;
 import dev.jorel.commandapi.executors.PlayerCommandExecutor;
@@ -40,10 +43,27 @@ public abstract class TestBase {
 	public TestBase() {
 		this.version = CommandAPIVersionHandler.getVersion();
 	}
+	
+	private static <T extends ServerMock> T mock1_13(T serverMockImplementation) {
+		if (MockPlatform.getFieldAs(MockBukkit.class, "mock", null, ServerMock.class) != null)
+		{
+			throw new IllegalStateException("Already mocking");
+		}
+		
+		MockPlatform.setField(MockBukkit.class, "mock", null, serverMockImplementation);
+//		mock = new ServerMock();
+		
+		Level defaultLevel = serverMockImplementation.getLogger().getLevel();
+		serverMockImplementation.getLogger().setLevel(Level.WARNING);
+		Bukkit.setServer(serverMockImplementation);
+		serverMockImplementation.getLogger().setLevel(defaultLevel);
+		
+		return serverMockImplementation;
+	}
 
 	public void setUp() {
 		resetAllPotions();
-		server = MockBukkit.mock(new CommandAPIServerMock());
+		server = mock1_13(new CommandAPIServerMock());
 		plugin = MockBukkit.load(Main.class);
 	}
 
@@ -52,7 +72,8 @@ public abstract class TestBase {
 		if (plugin != null) {
 			plugin.onDisable();
 		}
-		MockBukkit.unmock();
+//		MockBukkit.unmock();
+		MockBukkit.unload();
 	}
 
 	public static final PlayerCommandExecutor P_EXEC = (player, args) -> {};

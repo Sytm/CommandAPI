@@ -15,6 +15,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.help.HelpTopic;
 import org.bukkit.inventory.ItemFactory;
@@ -23,7 +24,6 @@ import org.bukkit.potion.PotionEffectType;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.internal.bind.JsonTreeReader;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 
@@ -151,13 +151,9 @@ public abstract class MockPlatform<CLW> extends CommandAPIBukkit<CLW> {
 		}
 	}
 
-	/***************
-	 * Other stuff *
-	 ***************/
-
-	public abstract ItemFactory getItemFactory();
-
-	public abstract org.bukkit.advancement.Advancement addAdvancement(NamespacedKey key);
+	/***************************
+	 * Backwards compatibility *
+	 ***************************/
 
 	/**
 	 * Converts 1.16.5 and below potion effect names to NamespacedKey names. For
@@ -166,7 +162,29 @@ public abstract class MockPlatform<CLW> extends CommandAPIBukkit<CLW> {
 	 * @param potionEffectType the potion effect to get the namespaced key for
 	 * @return a Minecraft namespaced key name for a potion effect
 	 */
-	public abstract String getBukkitPotionEffectTypeName(PotionEffectType potionEffectType);
+	public abstract String getNamespacedPotionEffectType(PotionEffectType potionEffectType);
+
+	/**
+	 * Sound name in the form {@code minecraft:<sound>}
+	 * @param sound sound
+	 * @return a sound
+	 */
+	public abstract String getNamespacedSound(Sound sound);
+	
+	/**
+	 * EntityType name in the form {@code minecraft:<entity>}
+	 * @param entity entity
+	 * @return an entity
+	 */
+	public abstract String getNamespacedEntityType(EntityType entity);
+
+	/***************
+	 * Other stuff *
+	 ***************/
+
+	public abstract ItemFactory getItemFactory();
+
+	public abstract org.bukkit.advancement.Advancement addAdvancement(NamespacedKey key);
 	
 	static record Pair<A, B>(A first, B second) {};
 	
