@@ -1,6 +1,8 @@
 package dev.jorel.commandapi.test.arguments;
 
+import static org.junit.Assume.assumeTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,7 +14,9 @@ import org.junit.jupiter.api.Test;
 
 import be.seeseemelk.mockbukkit.entity.PlayerMock;
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.MCVersion;
 import dev.jorel.commandapi.arguments.UUIDArgument;
+import dev.jorel.commandapi.exceptions.UnimplementedArgumentException;
 import dev.jorel.commandapi.test.Mut;
 import dev.jorel.commandapi.test.TestBase;
 
@@ -41,6 +45,7 @@ public class ArgumentUUIDTests extends TestBase {
 
 	@RepeatedTest(10)
 	public void executionTestWithUUIDArgument() {
+		assumeTrue(version.greaterThanOrEqualTo(MCVersion.V1_16));
 		Mut<UUID> results = Mut.of();
 
 		new CommandAPICommand("test")
@@ -63,12 +68,25 @@ public class ArgumentUUIDTests extends TestBase {
 		assertNoMoreResults(results);
 	}
 
+	/*********************************
+	 * Instantiation exception tests *
+	 *********************************/
+
+	@Test
+	public void exceptionTestWithUUIDArgument() {
+		assumeTrue(version.lessThan(MCVersion.V1_16));
+
+		// UUIDArgument only compatible with 1.16+
+		assertThrows(UnimplementedArgumentException.class, () -> new UUIDArgument("uuid"));
+	}
+
 	/********************
 	 * Suggestion tests *
 	 ********************/
 
 	@Test
 	public void suggestionTestWithUUIDArgument() {
+		assumeTrue(version.greaterThanOrEqualTo(MCVersion.V1_16));
 		new CommandAPICommand("test")
 			.withArguments(new UUIDArgument("uuid"))
 			.executesPlayer((player, args) -> {

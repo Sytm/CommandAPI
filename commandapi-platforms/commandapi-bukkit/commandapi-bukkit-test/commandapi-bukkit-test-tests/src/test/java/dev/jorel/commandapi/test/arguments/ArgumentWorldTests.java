@@ -1,6 +1,8 @@
 package dev.jorel.commandapi.test.arguments;
 
+import static org.junit.Assume.assumeTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
@@ -11,7 +13,9 @@ import org.junit.jupiter.api.Test;
 
 import be.seeseemelk.mockbukkit.entity.PlayerMock;
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.MCVersion;
 import dev.jorel.commandapi.arguments.WorldArgument;
+import dev.jorel.commandapi.exceptions.UnimplementedArgumentException;
 import dev.jorel.commandapi.test.Mut;
 import dev.jorel.commandapi.test.TestBase;
 
@@ -40,6 +44,7 @@ public class ArgumentWorldTests extends TestBase {
 
 	@Test
 	public void executionTestWithWorldArgument() {
+		assumeTrue(version.greaterThanOrEqualTo(MCVersion.V1_13_1));
 		Mut<World> results = Mut.of();
 
 		new CommandAPICommand("test")
@@ -84,12 +89,25 @@ public class ArgumentWorldTests extends TestBase {
 		assertNoMoreResults(results);
 	}
 
+	/*********************************
+	 * Instantiation exception tests *
+	 *********************************/
+
+	@Test
+	public void exceptionTestWithWorldArgument() {
+		assumeTrue(version.lessThan(MCVersion.V1_13_1));
+
+		// WorldArgument only compatible with 1.13.1+
+		assertThrows(UnimplementedArgumentException.class, () -> new WorldArgument("world"));
+	}
+
 	/********************
 	 * Suggestion tests *
 	 ********************/
 
 	@Test
 	public void suggestionTestWithWorldArgument() {
+		assumeTrue(version.greaterThanOrEqualTo(MCVersion.V1_13_1));
 		new CommandAPICommand("test")
 			.withArguments(new WorldArgument("world"))
 			.executesPlayer((player, args) -> {

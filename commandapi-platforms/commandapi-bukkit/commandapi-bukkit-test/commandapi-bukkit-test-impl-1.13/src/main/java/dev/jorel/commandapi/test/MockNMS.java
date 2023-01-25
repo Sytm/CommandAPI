@@ -2,7 +2,6 @@ package dev.jorel.commandapi.test;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.StreamSupport;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -214,13 +212,13 @@ public class MockNMS extends Enums {
 	
 	@Override
 	public String getNamespacedSound(Sound sound) {
-		return CraftSound.getSound(sound);
+		return "minecraft:" + CraftSound.getSound(sound);
 	}
 	
 	@SuppressWarnings("deprecation")
 	@Override
 	public String getNamespacedEntityType(EntityType entity) {
-		return "minecraft:" + entity.getName();
+		return entity.getName();
 	}
 	
 	/**************************
@@ -232,12 +230,10 @@ public class MockNMS extends Enums {
 		return CraftItemFactory.instance();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> getAllItemNames() {
-		return StreamSupport.stream(Item.REGISTRY.spliterator(), false)
+		return Item.REGISTRY.keySet().stream()
 			.map(Object::toString)
-			.map(s -> "minecraft:" + s)
 			.sorted()
 			.toList();
 	}
