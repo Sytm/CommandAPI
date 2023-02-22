@@ -220,8 +220,8 @@ public abstract class NMS_1_19_Common extends NMS_Common {
 		}
 
 		helpMapTopics = SafeVarHandle.ofOrNull(SimpleHelpMap.class, "helpTopics", Map.class);
-		entityPositionSource = SafeVarHandle.ofOrNull(EntityPositionSource.class, "c", Either.class);
-		itemInput = SafeVarHandle.ofOrNull(ItemInput.class, "c", CompoundTag.class);
+		entityPositionSource = SafeVarHandle.ofOrNull(EntityPositionSource.class, "entityOrUuidOrId", Either.class);
+		itemInput = SafeVarHandle.ofOrNull(ItemInput.class, "tag", CompoundTag.class);
 		ERROR_BIOME_INVALID = new DynamicCommandExceptionType(
 			arg -> net.minecraft.network.chat.Component.translatable("commands.locatebiome.invalid", arg));
 	}
@@ -490,7 +490,7 @@ public abstract class NMS_1_19_Common extends NMS_Common {
 		// to be used by anyone that registers a command via the CommandAPI.
 		EntitySelector argument = cmdCtx.getArgument(key, EntitySelector.class);
 		try {
-			CommandAPIHandler.getField(EntitySelector.class, "o").set(argument, false);
+			CommandAPIHandler.getField(EntitySelector.class, "usesSelector").set(argument, false);
 		} catch (IllegalArgumentException | IllegalAccessException e1) {
 			e1.printStackTrace();
 		}

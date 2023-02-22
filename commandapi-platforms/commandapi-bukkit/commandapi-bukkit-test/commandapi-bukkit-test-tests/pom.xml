@@ -173,6 +173,7 @@
 					<groupId>org.spigotmc</groupId>
 					<artifactId>spigot</artifactId>
 					<version>1.19.2-R0.1-SNAPSHOT</version> <!-- VERY IMPORTANT: CHECK 1.19-R0.1-SNAPSHOT WHICH HAS WEIRD FAILING TESTS!!!!! -->
+					<classifier>remapped-mojang</classifier>
 					<scope>provided</scope>
 				</dependency>
 			</dependencies>

@@ -54,6 +54,18 @@
 		</dependency>
 		
 		<!-- 1.17+ NMS can't be covered by code coverage due due to special source -->
+		<dependency>
+			<groupId>dev.jorel</groupId>
+			<artifactId>commandapi-bukkit-1.19-common</artifactId>
+			<version>${project.version}</version>
+			<classifier>mojang-mapped</classifier>
+		</dependency>
+		<dependency>
+			<groupId>dev.jorel</groupId>
+			<artifactId>commandapi-bukkit-1.19.1</artifactId>
+			<version>${project.version}</version>
+			<classifier>mojang-mapped</classifier>
+		</dependency>
 		
 		<!-- Not sure if I need this, but keeping it here just in case -->
 		<dependency>
